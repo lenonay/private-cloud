@@ -7,10 +7,11 @@ $dotenv = Dotenv::createImmutable($root);
 $dotenv->load();
 
 if($_SERVER['REQUEST_METHOD'] == "POST"){
-    echo json_encode(subirArchivo($_FILES["archivo"]));
+    $id = htmlspecialchars($_POST["id"]);
+    echo json_encode(subirArchivo($_FILES["archivo"], $id));
 }
 
-function subirArchivo($archivo){
+function subirArchivo($archivo, $id){
     $mime = $archivo["type"];
     $nombre = $archivo["name"];
 
@@ -35,4 +36,5 @@ function subirArchivo($archivo){
     }
 
     move_uploaded_file($tmp_dir, $nueva_ruta);
+    return $id;
 }

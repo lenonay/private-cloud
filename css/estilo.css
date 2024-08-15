@@ -36,6 +36,7 @@ section {
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    gap: 10px;
     padding: 25px;
     background: var(--fondo_sec);
     border-radius: 20px;
@@ -93,19 +94,81 @@ section {
     align-items: center;
     gap: 15px;
     width: 300px;
+    overflow: scroll;
 }
 
 .upload {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     gap: 10px;
-    width: 300px;
-    padding: 0px 10px;
+    width: 260px;
+    padding: 10px 20px;
+    background: var(--btn_sec);
+    border-radius: 10px;
+    box-shadow: 0 0 5px 1px #00000030;
 }
 
 .upload p {
     overflow: hidden;
     width: 100%;
+}
+
+.menu {
+    position: fixed;
+    display: grid;
+    grid-template-rows: 40px 1fr;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100vw;
+    height: 100vh;
+    margin-inline: auto;
+    background: var(--fondo_sec2);
+    padding: 5px;
+    overflow: hidden;
+    clip-path: circle(6% at top);
+    transition: clip-path 300ms ease;
+}
+
+.menu.desplegado {
+    clip-path: circle(60% at top);
+}
+
+.bloque {
+    background: #000;
+    height: 20px;
+    width: 20px;
+    justify-self: center;
+}
+
+.loader {
+    width: 25px;
+    padding: 8px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--med_lvl1_tb);
+    --_m: 
+      conic-gradient(#0000 10%,#000),
+      linear-gradient(#000 0 0) content-box;
+    -webkit-mask: var(--_m);
+            mask: var(--_m);
+    -webkit-mask-composite: source-out;
+            mask-composite: subtract;
+    animation: l3 1s infinite linear;
+  }
+  @keyframes l3 {to{transform: rotate(1turn)}}
+
+.loading::before {
+    animation: puntos steps(1, end) 1s infinite;
+    content: "";
+}
+
+@keyframes puntos {
+    0%{content: "";}
+    25%{content: "·";}
+    50%{content: "··";}
+    75%{content: "···";}
+    100%{content: "";}
 }

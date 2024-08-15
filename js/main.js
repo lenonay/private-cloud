@@ -2,6 +2,12 @@ const drag = document.querySelector(".drag_zone");
 const subidos = document.querySelector(".subidos");
 const boton = document.querySelector(".btn_add");
 const input = document.getElementById("inp");
+const btn = document.querySelector(".bloque");
+const menu = document.querySelector(".menu");
+
+btn.addEventListener("click", e =>{
+    menu.classList.toggle("desplegado");
+});
 
 boton.addEventListener("click", e => {
     e.preventDefault();
@@ -43,29 +49,32 @@ function cargarArchivo(files) {
 
 function procesar(file) {
     const name = file.name;
-    const tipo = file.type;
+    const id = Math.random().toString(32).replace(/0\./,"");
 
     const url = URL.createObjectURL(file);
 
     const div = `
         <div class="upload">
-        <img src="${url}" width="80px" height="50px ">
-        <p><b>Nombre:</b> ${name}</p>
-        <p><b>Tipo:</b> ${tipo}</p>
+            <img src="${url}" width="60px" height="50px ">
+            <p>${name}</p>
+            <div id="${id}">
+                <div class="loader"></div>
+            </div>
         </div>
-        `;
+    `;
 
     subidos.insertAdjacentHTML("afterbegin", div);
 
-    subirArchivo(file);
+    subirArchivo(file,id);
 
     URL.revokeObjectURL(url);
 }
 
-function subirArchivo(file){
+function subirArchivo(file, id){
 
     const form = new FormData();
     form.append("archivo", file);
+    form.append("id", id);
 
     fetch("php/app.php",{
         method: "POST",
@@ -75,7 +84,11 @@ function subirArchivo(file){
             return response.json();
         }
     }).then(data =>{
-        console.log(data);
+        if(data !== null){
+            const load = document.getElementById(data);
+            load.firstElementChild.remove();
+            load.innerHTML = "<p>OK</p>";
+        }
     });
 
 }
