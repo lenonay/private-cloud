@@ -21,6 +21,7 @@ body {
     align-items: center;
     max-width: 1200px;
     margin-inline: auto;
+    padding-inline: 10px;
 }
 
 header {
@@ -132,17 +133,21 @@ header>* {
 }
 
 .viewer {
-    width: 98%;
+    position: relative;
+    width: 100%;
     min-height: 400px;
     margin-inline: auto;
     background: var(--gray);
     margin-top: 25px;
     border-radius: 30px;
     box-shadow: 0 0 10px 1px #00000030;
-    display: grid;
-    grid-template-columns: repeat(4, 200px);
-    column-gap: 20px;
-    grid-template-rows: auto;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+    transition: box-shadow 300ms ease;
+    padding: 25px;
 }
 
 .viewer.empty {
@@ -156,4 +161,72 @@ header>* {
     font-family: 'Segoe UI', serif;
     font-weight: 600;
     color: var(--dark_blue);
+}
+
+.viewer.drag {
+    box-shadow: 0 0 5px 0px var(--light);
+}
+
+.card {
+    width: 218px;
+    height: 272px;
+    background: var(--dark_blue);
+    padding: 15px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 0 10px 1px #00000030;
+}
+
+.card img {
+    width: 100%;
+    height: 160px;
+    aspect-ratio: 1 / 1;
+    border-radius: 15px;
+    box-shadow: 0 0 5px 1px #FFFFFF30;
+}
+
+.card h2 {
+    font-family: 'Segoe UI', serif;
+    color: white;
+    width: 98%;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    overflow: hidden;
+    flex-wrap: nowrap;
+}
+
+.botones {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.botones button {
+    background: none;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    filter: drop-shadow( 0 0 5px 1px #FFFFFF30);
+}
+
+
+/* Media Query */
+
+@media screen and (max-width: 400px){
+    .viewer {
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 15px;
+    }
 }
