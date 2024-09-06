@@ -19,16 +19,20 @@ switch($arg){
     case "upload":
         echo json_encode($File->Upload(
             $_FILES["archivo"],
-            htmlspecialchars($_POST["id"])
+            htmlspecialchars($_POST["id"]),
+            htmlspecialchars($_POST["ruta"])
         ));
         exit();
     case "getAll":
-        echo json_encode($File->GetAll());
+        echo json_encode($File->GetAll(
+            htmlspecialchars($_POST["ruta"])
+        ));
         exit();
     case "getIMG":
         echo json_encode($File->getIMG(
             htmlspecialchars($_POST["name"]),
-            htmlspecialchars($_POST["id"])
+            htmlspecialchars($_POST["id"]),
+            htmlspecialchars($_POST["ruta"])
         ));
         exit();
     default:
