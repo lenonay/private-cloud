@@ -43,14 +43,6 @@ viewer.addEventListener("drop", e => {
     cargarArhivos(archivos);
 });
 
-gear.addEventListener("click", e => {
-    GetAllInfo("");
-});
-
-search.addEventListener("click", e => {
-    alert(current_route);
-})
-
 
 // FUNCIONES
 // Cargar por primera vez todas las fotos
@@ -109,7 +101,7 @@ function UploadFile(file, ruta) {
         console.log(data);
 
         if (data[0] !== "OK") {
-            console.log(data[0]);
+            ShowErrors(data[0]);
         }
         // Recuperamos el elemento que se ha subido;
         const load = document.querySelector(`#${data[1]}`);
@@ -139,10 +131,10 @@ function GetAllInfo(ruta) {
             return response.json();
         }
     }).then(data => {
+        if (data[0] == "error") ShowErrors(data[1]);
         ProcessData(data)
     });
 }
-
 
 function ProcessData(array) {
     viewer.innerHTML = "";
@@ -197,6 +189,8 @@ function ProcessData(array) {
         back.addEventListener("click", retrocederPath)
     }
 
+    document.querySelector(".content").addEventListener("dblclick", RenameItem);
+
     const folders = viewer.querySelectorAll("tr[folder]");
 
     folders.forEach(folder => {
@@ -221,4 +215,85 @@ function retrocederPath() {
 
     // Cargamos el contenido
     GetAllInfo(current_route);
+}
+
+function RenameItem(event) {
+    let new_name = "";
+
+    const Inputhandler = () => {
+        // Si esta vacío se queda el anterior y obtenemos el nombre
+        if (inp.value == "") {
+            new_name = `${basename}${extension}`;
+        } else {
+            new_name = `${inp.value}${extension}`;
+            RenameItemServer(new_name, old_name);
+        }
+        // Borramos el input y actualizamos el valor en el cliente
+        inp.remove();
+        name.textContent = new_name;
+    }
+
+    const name = event.target.closest("td[name]");
+    // Si se hace click sobre otra cosa salimos 
+    if (!name) return;
+
+    const re = /\..*/;
+
+    // Obtenemos la extension y el nombre para evitar problemas
+    const extension = name.textContent.match(re)[0];
+    const basename = name.textContent.replace(re, "");
+    const old_name = `${basename}${extension}`;
+
+    // Creamos el input y lo mostramos
+    const inp_html = `<input class="rename_inp" type="text" name="rename" value="${basename}"/>`;
+    name.insertAdjacentHTML("afterbegin", inp_html);
+
+    const inp = document.querySelector(".rename_inp");
+    // Cuando se le de click ENTER obtenemos el valor o focusoff
+    inp.focus();
+    inp.select(0, inp.value.length)
+
+    inp.addEventListener("keydown", e => {
+        if (e.key === "Escape" || e.key === "Enter") {
+            inp.blur();
+        }
+    });
+
+    // Borramos el input
+    inp.addEventListener("blur", Inputhandler);
+}
+
+function RenameItemServer(new_name, old_name) {
+    const form = new FormData;
+
+    form.append("arg", "rename");
+
+    form.append("new_name", new_name);
+    form.append("old_name", old_name);
+    form.append("ruta", current_route);
+
+    fetch("php/files.php", {
+        method: "POST",
+        body: form
+    }).then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+    }).then(data => {
+        if (data != "OK") {
+            ShowErrors(data);
+        }
+    });
+}
+
+function ShowErrors(error) {
+    const th = document.querySelector(".content thead th");
+
+    th.textContent = error;
+    th.classList.add("error");
+
+    setTimeout(() => {
+        th.textContent = current_route;
+        th.classList.remove("error");
+    }, 3000)
 }

@@ -19,7 +19,7 @@ class File
 
         if (move_uploaded_file($tmp_dir, $nueva_ruta)) {
             $type = $this->get_type(mime_content_type($nueva_ruta));
-            return["OK", $id, $type];
+            return ["OK", $id, $type];
         } else {
             return ["Error al subir"];
         }
@@ -32,6 +32,10 @@ class File
         $n_ruta = ($ruta == "/") ? $root : "$root/$ruta";
 
         $dh = opendir($n_ruta);
+
+        if($dh == false){
+            return ["error", "Error al leer la carpeta"];
+        }
 
         while (($file = readdir($dh))) {
             if ($file != "." && $file != "..") {
@@ -66,6 +70,21 @@ class File
                 break;
         }
         return $type;
+    }
+
+    public function rename($new_name, $old_name , $ruta)
+    {
+        global $root;
+        $n_ruta = ($ruta == "/") ? $root : "$root/$ruta";
+
+        $old_path = "$n_ruta/$old_name";
+        $new_path = "$n_ruta/$new_name";
+
+        if(rename($old_path, $new_path)){
+            return "OK";
+        }else{
+            return "Error al renombrar";
+        }
     }
 
     public function getIMG($name, $id, $ruta)
