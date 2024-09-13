@@ -16,6 +16,18 @@ Esta desarollado usando una API programada en PHP y llamadas a la misma a travé
 **Camios menores:**
 - Ahora hay un mayor manejo de errores en todas las funciones
 
+## 0.4.0
+**Cambios Mayores**
+- Ahora hay carpeta de papelera de reciclaje
+- Se pueden borrar archivos o directorios completos
+- Se pueden borrar definitivamente en la palera
+
+**Cambios Menores**
+- Los archivos ocultos ni se muestran ni causan conflicto
+
+*Notas:*
+Queda crear carpetas, restaurar archivos a su ruta original, si no existe mover a al /
+
 ## Desarrollo actual.
 De momento ya se puede subir ficheros y navegar por la estructura de carpetas. Queda descargarlos, crear carpetas, descarga multiple comprimiendo en un zip. Y lo más importante ver las propias imágenes y documentos.
 

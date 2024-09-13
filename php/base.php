@@ -3,6 +3,7 @@
 // el user www-data tenga permisos para llegar hasta
 // ese directorio y pueda escribir en él.
 $root = "/home/priv";
+$recycle = "/home/priv/.recycle_bin";
 
 class File
 {
@@ -33,12 +34,13 @@ class File
 
         $dh = opendir($n_ruta);
 
-        if($dh == false){
+        if ($dh == false) {
             return ["error", "Error al leer la carpeta"];
         }
 
         while (($file = readdir($dh))) {
-            if ($file != "." && $file != "..") {
+            $oculto = str_starts_with($file, ".");
+            if ($file != "." && $file != ".." && $oculto === false) {
                 $tipo = (is_dir("$n_ruta/$file")) ? "folder" : ($this->get_type(mime_content_type("$n_ruta/$file")));
 
                 array_push($names, [$tipo, $file]);
@@ -49,6 +51,84 @@ class File
         return $names;
     }
 
+    public function rename($new_name, $old_name, $ruta)
+    {
+        global $root;
+        $n_ruta = ($ruta == "/") ? $root : "$root/$ruta";
+
+        $old_path = "$n_ruta/$old_name";
+        $new_path = "$n_ruta/$new_name";
+
+        if (rename($old_path, $new_path)) {
+            return "OK";
+        } else {
+            return "Error al renombrar";
+        }
+    }
+    public function Delete($name, $ruta)
+    {
+        global $root, $recycle;
+        $n_ruta = ($ruta == "/") ? $root : "$root/$ruta";
+        $path = "$n_ruta/$name";
+
+        // Crear la carpeta recycle_bin si no esta
+        if (!is_dir($recycle)) {
+            // Cambiamos el umask
+            umask(0002);
+            // Creamos la carpeta
+            mkdir($recycle, 0770);
+            // Devolvemos el umask
+            umask(0);
+        }
+
+        if (rename($path, "$recycle/$name")) {
+            return "OK";
+        } else {
+            return "Error deleting";
+        }
+    }
+
+    public function delete_def($name, $ruta)
+    {
+        global $recycle;
+        $path = "$recycle/$name";
+
+        return $this->delTreeDir($path);
+        
+    }
+
+    private function delTreeDir($path)
+    {
+        if (!is_dir($path)) {
+            if (unlink($path)) {
+                return "OK";
+            } else {
+                return "Error al borrar archivo único";
+            }
+        }
+
+        $items = scandir($path);
+        foreach ($items as $file) {
+            if ($file == "." || $file == "..") {
+                continue; // Ignorar los directorios actuales y padres
+            }
+            $n_path = "$path/$file";
+
+            if (is_dir($n_path)) {
+                // Llamar recursivamente si es un subdirectorio
+                $this->delTreeDir($n_path);
+            } else {
+                unlink($n_path);
+            }
+        }
+
+        // Finalmente, eliminar el directorio vacío
+        if (rmdir($path)) {
+            return "OK";
+        } else {
+            return "Error al eliminar el directorio:";
+        }
+    }
     private function get_type($mime)
     {
         $type = "";
@@ -72,20 +152,6 @@ class File
         return $type;
     }
 
-    public function rename($new_name, $old_name , $ruta)
-    {
-        global $root;
-        $n_ruta = ($ruta == "/") ? $root : "$root/$ruta";
-
-        $old_path = "$n_ruta/$old_name";
-        $new_path = "$n_ruta/$new_name";
-
-        if(rename($old_path, $new_path)){
-            return "OK";
-        }else{
-            return "Error al renombrar";
-        }
-    }
 
     public function getIMG($name, $id, $ruta)
     {

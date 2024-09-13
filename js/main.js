@@ -1,4 +1,5 @@
-import { get_svg } from "./svg.js"; // Importamos el svg para que no ocupe medio codigo
+import { get_svg } from "./svg.js"; // Importamos los svg
+import { get_size } from "./svg.js"; // Importamos el selector de tamaño segun el vw
 
 const $ = sel => document.querySelector(sel);
 const $$ = sel => document.querySelectorAll(sel);
@@ -9,11 +10,13 @@ let current_route = "/";
 const input = document.querySelector("#archivos_inp");
 const upload_btn = document.querySelector(".upload");
 const viewer = document.querySelector(".viewer");
+const menu_vw = $(".menu_vw");
 const gear = $(".gear");
 const search = $(".search");
 
 // OBJECTS
 const svg = get_svg();
+svg._size = get_size();
 
 // EVENTS
 upload_btn.addEventListener("click", e => {
@@ -43,10 +46,59 @@ viewer.addEventListener("drop", e => {
     cargarArhivos(archivos);
 });
 
+menu_vw.addEventListener("click", HandlerLatMenu);
+
 
 // FUNCIONES
-// Cargar por primera vez todas las fotos
-GetAllInfo("/");
+// Cargamos los iconos
+LoadOpcIcons();
+// Cargar por primera vez la vault
+HandlerChangeOpc(document.querySelector(".options[recycle]"), "recycle");
+
+function LoadOpcIcons() {
+    // Recuperamos todas las opciones
+    const opciones = $$(".options");
+    // Iteramos para recuperar el atributo
+    opciones.forEach(opc => {
+        const attr = opc.getAttributeNames()[0];
+
+        // Añadimos el icono segun el atributo
+        opc.insertAdjacentHTML("afterbegin", svg[attr]);
+    })
+}
+
+function HandlerLatMenu(event) {
+
+    // Verificamos si hemos hecho click en una opcion
+    const opcion = event.target.closest(".options");
+    // Si no, salimos sin hacer nada.
+    if (opcion == null) { return }
+    const attr = opcion.getAttributeNames()[0];
+
+    // Quitamos todas las clases selected
+    const opciones = $$(".options");
+    opciones.forEach(opc => {
+        opc.classList.remove("selected");
+    })
+
+    HandlerChangeOpc(opcion, attr)
+}
+
+function HandlerChangeOpc(option, attr) {
+
+    option.classList.add("selected");
+
+    switch (attr) {
+        case "main":
+            GetAllInfo("/");
+            current_route = "/";
+            break;
+        case "recycle":
+            GetAllInfo(".recycle_bin");
+            current_route = ".recycle_bin";
+            break;
+    }
+}
 
 function cargarArhivos(files) {
     for (const file of files) {
@@ -61,18 +113,29 @@ function procesarArchivo(file) {
 }
 
 function UploadFile(file, ruta) {
+
+    if(current_route.includes(".recycle_bin")){
+        ShowErrors("No se puede subir aquí");
+        return;
+    }
+
     const form = new FormData;
 
     const id = Math.random().toString(32).replace(/0\./, "up-");
     const name = file.name;
+
+    // Si el archivo es demasiado pesado cancelar.
+    if (file.size > 200000000) { ShowErrors("Archivo demasiado pesado"); return "" }
 
     ruta = ruta ?? "/";
     ruta = (ruta == "") ? "/" : ruta;
 
     const row = `
         <tr>
-            <td id=${id} icon class="loader">${svg.loader}</td>
-            <td name>${name}</td>
+            <td icon>${icon}</td>
+            <td name>${ar[1]}</td>
+            <td del class="act_btn">${svg.trash}</td>
+            <td down class="act_btn">${svg.download}</td>
         </tr>
     `;
 
@@ -139,13 +202,12 @@ function GetAllInfo(ruta) {
 function ProcessData(array) {
     viewer.innerHTML = "";
 
-    svg._size = "40px";
     svg._color = "90f6d7";
 
     let extra = "";
-    if (current_route !== "/") {
+    if (current_route !== "/" && current_route !== ".recycle_bin") {
         extra = `
-            <tr back>
+            <tr back colspan="3">
                 <td>${svg.back}</td>
                 <td>Retroceder</td>
             </tr>
@@ -155,7 +217,7 @@ function ProcessData(array) {
     let table = `
         <table class="content">
         <thead>
-            <th colspan="2">${current_route}</th>
+            <th colspan="5">${current_route}</th>
         </thead>    
         <tbody>
         ${extra}
@@ -170,12 +232,22 @@ function ProcessData(array) {
         } else {
             svg._color = "35bcbf";
         }
+        // Icono segun tipo de archivo
         const icon = svg[ar[0]];
+
+        // Color of icons
+        svg._color = "000000";
+
+        const download = (current_route.includes(".recycle_bin"))
+            ? ""
+            : `<td down class="act_btn">${svg.download}</td>`;
 
         table += `
             <tr ${attr}>
                 <td icon>${icon}</td>
                 <td name>${ar[1]}</td>
+                <td del class="act_btn">${svg.trash}</td>
+                ${download}
             </tr>
         `;
     });
@@ -191,12 +263,18 @@ function ProcessData(array) {
 
     document.querySelector(".content").addEventListener("dblclick", RenameItem);
 
+    const delBtns = $$("td[del]");
+
+    delBtns.forEach(boton => {
+        boton.addEventListener("click", Delete);
+    });
+
     const folders = viewer.querySelectorAll("tr[folder]");
 
     folders.forEach(folder => {
         const td = folder.querySelector("td[name]");
 
-        folder.addEventListener("click", e => {
+        td.addEventListener("click", e => {
             current_route += (current_route === "/") ? td.textContent : `/${td.textContent}`;
             GetAllInfo(current_route);
         });
@@ -219,6 +297,10 @@ function retrocederPath() {
 
 function RenameItem(event) {
     let new_name = "";
+    // Evitamos que se cambie el nombre en la papelera
+    if(current_route.includes(".recycle_bin")){
+        return;
+    }
 
     const Inputhandler = () => {
         // Si esta vacío se queda el anterior y obtenemos el nombre
@@ -296,4 +378,93 @@ function ShowErrors(error) {
         th.textContent = current_route;
         th.classList.remove("error");
     }, 3000)
+}
+
+function Delete(event) {
+    const padre = event.target.closest("tr");
+    const name = padre.querySelector("td[name]").textContent;
+
+
+    const form = new FormData;
+
+    if (current_route.includes(".recycle_bin")) {
+        Delete_def(padre, name);
+        return;
+    }
+    form.append("arg", "delete");
+
+    form.append("name", name);
+    form.append("ruta", current_route);
+
+    fetch("php/files.php", {
+        method: "POST",
+        body: form
+    }).then(response => {
+        if (response.ok) {
+            return response.json();
+        }
+    }).then(data => {
+        if (data == "OK") {
+            padre.remove();
+        } else {
+            ShowErrors(data);
+        }
+    });
+}
+
+function Delete_def(padre, name) {
+    const accept = () => {
+        // Generamos el form
+        const form = new FormData;
+        form.append("arg", "delete_def");
+        form.append("name", name);
+        form.append("ruta", current_route);
+
+        fetch("php/files.php", {
+            method: "POST",
+            body: form
+        }).then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+        }).then(data => {
+            cancel();
+            if (data === "OK") {
+                padre.remove();
+            } else {
+                ShowErrors(data);
+            }
+        });
+    }
+
+    const cancel = () => {
+        $(".aviso").remove();
+    }
+
+    // Creamos el aviso
+    const div = `
+        <div class="aviso">
+            ${svg.alert}
+            <p>Esta acción no se puede deshacer</p>
+            <div class="buttons">
+                <button class="accept">Aceptar</button>
+                <button class="cancel">Cancelar</button>
+            </div>
+        </div>
+    `;
+
+    // Si ya hay uno lo borramos
+    if ($(".aviso")) {
+        cancel();
+    }
+
+
+
+    // Lo mostramos
+    viewer.insertAdjacentHTML("afterbegin", div);
+
+    // Añadimos los eventos para los botones
+    $(".aviso .accept").addEventListener("click", accept);
+    $(".aviso .cancel").addEventListener("click", cancel);
+
 }

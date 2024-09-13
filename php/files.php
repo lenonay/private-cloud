@@ -42,6 +42,18 @@ switch ($arg) {
             htmlspecialchars($_POST["ruta"])
         ));
         exit();
+    case "delete":
+        echo json_encode($File->Delete(
+            htmlspecialchars($_POST["name"]),
+            htmlspecialchars($_POST["ruta"])
+        ));
+        exit();
+    case "delete_def":
+        echo json_encode($File->delete_def(
+            htmlspecialchars($_POST["name"]),
+            htmlspecialchars($_POST["ruta"])
+        ));
+        exit();
     default:
         return json_encode(["Argumento erróneo"]);
 }
