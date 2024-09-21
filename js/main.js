@@ -12,8 +12,6 @@ const input = document.querySelector("#archivos_inp");
 const upload_btn = document.querySelector(".upload");
 const viewer = document.querySelector(".viewer");
 const menu_vw = $(".menu_vw");
-const gear = $(".gear");
-const search = $(".search");
 
 // OBJECTS
 const svg = get_svg();
@@ -47,11 +45,12 @@ viewer.addEventListener("drop", e => {
     cargarArhivos(archivos);
 });
 
+// Evento menu lateral
 menu_vw.addEventListener("click", HandlerLatMenu);
 
 
 // FUNCIONES
-// Cargamos los iconos
+// Cargamos los iconos del menu lateral
 LoadOpcIcons();
 // Cargar por primera vez la vault
 HandlerChangeOpc(document.querySelector(".options[main]"), "main");
@@ -82,13 +81,16 @@ function HandlerLatMenu(event) {
         opc.classList.remove("selected");
     })
 
+    // Manejamos la seleccion de opciones
     HandlerChangeOpc(opcion, attr)
 }
 
 function HandlerChangeOpc(option, attr) {
 
+    // Seleccionamos la opcion
     option.classList.add("selected");
 
+    // Cambiamos la ruta y establecemos el contenido
     switch (attr) {
         case "main":
             GetAllInfo("/");
@@ -115,22 +117,27 @@ function procesarArchivo(file) {
 
 function UploadFile(file, ruta) {
 
+    // Validamos si estamos en recycle
     if (current_route.includes(".recycle_bin")) {
         ShowErrors("No se puede subir aquí");
         return;
     }
 
+    // Instanciamos un form
     const form = new FormData;
 
+    // Creamos el ID y obtenemos el nombre
     const id = Math.random().toString(32).replace(/0\./, "up-");
     const name = file.name;
 
     // Si el archivo es demasiado pesado cancelar.
     if (file.size > 200000000) { ShowErrors("Archivo demasiado pesado"); return "" }
 
+    // Validamos la ruta
     ruta = ruta ?? "/";
     ruta = (ruta == "") ? "/" : ruta;
 
+    // Creamos la linea temporal
     const row = `
         <tr>
             <td id="${id}" icon>${svg.loader}</td>
@@ -138,20 +145,26 @@ function UploadFile(file, ruta) {
         </tr>
     `;
 
+    // Obtenemos el tbody y el retroceder path
     const tbody = document.querySelector(".content tbody");
     const back = tbody.querySelector("tr[back]");
+
+    // Si hay retroceder path lo añadimos despues de este
+    // sino el primero del tbody
     if (back) {
         back.insertAdjacentHTML("afterend", row);
     } else {
         tbody.insertAdjacentHTML("afterbegin", row);
     }
 
+    // Añadimos los parametros al form
     form.append("arg", "upload");
 
     form.append("archivo", file);
     form.append("id", id);
     form.append("ruta", ruta);
 
+    // Enviamos al server y procesamos
     fetch("php/files.php", {
         method: "POST",
         body: form
@@ -160,8 +173,10 @@ function UploadFile(file, ruta) {
             return response.json();
         }
     }).then(data => {
+        // Si hay errores los mostramos y eliminamos el elemento temporal
         if (data[0] !== "OK") {
             ShowErrors(data[0]);
+            $(`#${data[1]}`).remove();
         }
         // Recuperamos el elemento que se ha subido;
         const load = document.querySelector(`#${data[1]}`);
@@ -170,19 +185,24 @@ function UploadFile(file, ruta) {
         load.classList.remove("loader");
         svg._color = "35bcbf";
         load.innerHTML = svg[data[2]];
+
+        // Recargamos el path
         GetAllInfo(current_route)
     });
 }
 
 function GetAllInfo(ruta) {
+    // Creamos instancia del form
     const form = new FormData;
 
-    ruta = ruta ?? "/";
-    ruta = (ruta == "") ? "/" : ruta;
+    ruta = ruta ?? "/"; // Sino hay parametro => raiz
+    ruta = (ruta == "") ? "/" : ruta; //Si es un campo vacio => raiz
 
+    // Añadimos los campos
     form.append("arg", "getAll");
     form.append("ruta", ruta);
 
+    // Enviamos la peticion al server y la procesamos
     fetch("php/files.php", {
         method: "POST",
         body: form
@@ -191,17 +211,25 @@ function GetAllInfo(ruta) {
             return response.json();
         }
     }).then(data => {
-        if (data[0] == "error") ShowErrors(data[1]);
+        // Si hay un error lo mostramos
+        if (data[0] == "error") {
+            ShowErrors(data[1])
+            return;
+        };
         ProcessData(data)
     });
 }
 
 function ProcessData(array) {
+    // Limpiamos el viewer
     viewer.innerHTML = "";
 
+    // Inicializamos variables y ponemos el color del svg
     svg._color = "90f6d7";
-
     let extra = "";
+
+    // Si estamos en un subdirectorio que aparezca la
+    // opción de retroceder un path
     if (current_route !== "/" && current_route !== ".recycle_bin") {
         extra = `
             <tr back colspan="3">
@@ -211,18 +239,23 @@ function ProcessData(array) {
         `;
     }
 
+    // Creamos el thead de la tabla con la ruta
+    // y las opciones
     let table = `
         <table class="content">
         <thead>
-            <th colspan="5">${current_route}</th>
+            ${Set_Options()}
+            <th class="route_display" colspan="5">${current_route}</th>
         </thead>    
         <tbody>
         ${extra}
     `;
 
+    // Iteramos por cada elemento recuperado
     array.forEach(ar => {
         let attr = "";
 
+        // Asignamos el tipo en funcion de si es una carpeta o no
         if (ar[0] == "folder") {
             attr = "folder";
             svg._color = "263849";
@@ -230,16 +263,21 @@ function ProcessData(array) {
             svg._color = "35bcbf";
             attr = "file";
         }
-        // Icono segun tipo de archivo
+        svg._size = "30px"
+
+        // Get icon by type
         const icon = svg[ar[0]];
 
-        // Color of icons
+        // Set default color for icons
         svg._color = "000000";
 
+        // Icono segun tipo de archivo
         const download = (current_route.includes(".recycle_bin"))
             ? ""
-            : `<td down class="act_btn">${svg.download}</td>`;
+            : `<td down class="act_btn">${svg.download}</td>
+        `;
 
+        // Añadimos el elemento a la tabla
         table += `
             <tr ${attr}>
                 <td icon>${icon}</td>
@@ -250,21 +288,25 @@ function ProcessData(array) {
         `;
     });
 
+    // Cerramos la tabla
     table += `</tbody></table>`;
 
+    // Insertamos la tabla
     viewer.insertAdjacentHTML("afterbegin", table);
 
+    // Creamos el evento para retroceder un path
     const back = viewer.querySelector("tr[back]");
     if (back) {
         back.addEventListener("click", retrocederPath)
     }
 
+    // Evento para renombrar
     document.querySelector(".content").addEventListener("dblclick", RenameItem);
 
     // Obtenemos los archivos
     const archivos = $$("tr[file] td[name]");
 
-    // Asginamos el evento
+    // Evento para mostrar el display
     archivos.forEach(archivo => {
         archivo.addEventListener("click", async event => {
             // Procesamos la petición
@@ -283,7 +325,7 @@ function ProcessData(array) {
     // Obtenemos los botones de borrar
     const delBtns = $$("td[del]");
 
-    // Asignamos el evento
+    // Evento para borrar archivos
     delBtns.forEach(boton => {
         boton.addEventListener("click", Delete);
     });
@@ -291,7 +333,7 @@ function ProcessData(array) {
     // Obtemos las carpetas
     const folders = viewer.querySelectorAll("tr[folder]");
 
-    // Asignamos el nuevo path y recargamos
+    // Evento para camabiar direcorio
     folders.forEach(folder => {
         const td = folder.querySelector("td[name]");
 
@@ -356,6 +398,7 @@ function RenameItem(event) {
     inp.focus();
     inp.select(0, inp.value.length)
 
+    // Evento para eliminar el input
     inp.addEventListener("keydown", e => {
         if (e.key === "Escape" || e.key === "Enter") {
             inp.blur();
@@ -367,14 +410,17 @@ function RenameItem(event) {
 }
 
 function RenameItemServer(new_name, old_name) {
+    // Instanciamos un form
     const form = new FormData;
 
+    // Añadimos parámetros
     form.append("arg", "rename");
 
     form.append("new_name", new_name);
     form.append("old_name", old_name);
     form.append("ruta", current_route);
 
+    // Enviamos la peticion
     fetch("php/files.php", {
         method: "POST",
         body: form
@@ -383,6 +429,7 @@ function RenameItemServer(new_name, old_name) {
             return response.json();
         }
     }).then(data => {
+        // Si hay error lo mostramos
         if (data != "OK") {
             ShowErrors(data);
         }
@@ -390,11 +437,14 @@ function RenameItemServer(new_name, old_name) {
 }
 
 function ShowErrors(error) {
-    const th = document.querySelector(".content thead th");
+    // Recuperamos el route display
+    const th = document.querySelector(".route_display");
 
+    // Mostramos el error y añadimos la clase error
     th.textContent = error;
     th.classList.add("error");
 
+    // Devolvemos la ruta a la actual y eliminamos la clase error
     setTimeout(() => {
         th.textContent = current_route;
         th.classList.remove("error");
@@ -402,21 +452,26 @@ function ShowErrors(error) {
 }
 
 function Delete(event) {
+    // Obtenemos el padre y el nombre del archivo
     const padre = event.target.closest("tr");
     const name = padre.querySelector("td[name]").textContent;
 
-
+    // Instanciamos un form
     const form = new FormData;
 
+    // Si estamos en recycle borramos definitivamente
     if (current_route.includes(".recycle_bin")) {
         Delete_def(padre, name);
         return;
     }
+
+    // Añadimos los parámetros 
     form.append("arg", "delete");
 
     form.append("name", name);
     form.append("ruta", current_route);
 
+    // Realizamos la petición
     fetch("php/files.php", {
         method: "POST",
         body: form
@@ -426,21 +481,25 @@ function Delete(event) {
         }
     }).then(data => {
         if (data == "OK") {
+            // Si salió bien podemos borrar el padre
             padre.remove();
         } else {
+            // Sino mostramos el error
             ShowErrors(data);
         }
     });
 }
 
 function Delete_def(padre, name) {
+    // Comportamiento para el boton de aceptar del aviso
     const accept = () => {
-        // Generamos el form
+        // Instanciamos y parametrizamos el form
         const form = new FormData;
         form.append("arg", "delete_def");
         form.append("name", name);
         form.append("ruta", current_route);
 
+        // Realizamos la request
         fetch("php/files.php", {
             method: "POST",
             body: form
@@ -449,17 +508,17 @@ function Delete_def(padre, name) {
                 return response.json();
             }
         }).then(data => {
-            cancel();
+            cancel(); // Borramos el aviso
             if (data === "OK") {
-                padre.remove();
+                padre.remove(); // Borramos el padre
             } else {
-                ShowErrors(data);
+                ShowErrors(data); // Mostramos errores si habían
             }
         });
     }
 
     const cancel = () => {
-        $(".aviso").remove();
+        $(".aviso").remove(); // Borramos el aviso
     }
 
     // Creamos el aviso
@@ -479,8 +538,6 @@ function Delete_def(padre, name) {
         cancel();
     }
 
-
-
     // Lo mostramos
     viewer.insertAdjacentHTML("afterbegin", div);
 
@@ -490,12 +547,13 @@ function Delete_def(padre, name) {
 
 }
 
-function ProcessIMG(data) {
+function ProcessIMG(image) {
 
-    const { width, height, src } = data
+    // Recuperamos el src de la imagen
+    const { src } = image
 
     // Borramos el display si ya estaba
-    if($(".display")){
+    if ($(".display")) {
         $(".display").remove();
     }
 
@@ -516,31 +574,24 @@ function ProcessIMG(data) {
     `;
 
     // Añadimos ambos al documento
-    $(".main").insertAdjacentHTML("afterbegin",back);
-    $(".main").insertAdjacentHTML("afterbegin",display);
+    $(".main").insertAdjacentHTML("afterbegin", back);
+    $(".main").insertAdjacentHTML("afterbegin", display);
 
     // Creamos el evento para borrar ambas cosas
-    $(".back").addEventListener("click", e =>{
+    $(".back").addEventListener("click", e => {
         $(".display").remove();
         e.target.remove();
     });
-    
-
-
 }
 
 function Set_Options() {
+    // Si estamos en recycle no devolvemos nada
     if (current_route.includes(".recycle_bin")) {
-        // Quitar la opción de nueva carpeta
-        return
+        return "";
     }
 
-    const html = `
-        <tr class="options_table">
-            <th>
-                
-            </th>
-        </tr>
+    // Sino devolvemos la opcion de crear una carpeta
+    return `
+        <th class="new_folder">${svg.new_folder}</th>
     `;
-
 }

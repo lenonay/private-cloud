@@ -207,17 +207,34 @@ header>* {
     width: 100%;
 }
 
-.content thead tr th {
-    margin-bottom: 10px;
+.content thead th {
     background: var(--dark);
     padding: 5px 15px;
     border-radius: 10px;
+}
+
+.route_display {
     text-align: left;
     font-size: 24px;
     color: aliceblue;
 }
 
-.content thead tr th.error{
+.new_folder {
+    color: aliceblue;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 300ms ease;
+}
+
+.new_folder:hover {
+    color: var(--light);
+    box-shadow: 0 0 5px 1px var(--light);
+}
+
+th.error{
     font-weight: 600;
     color: var(--alert);
 }

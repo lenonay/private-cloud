@@ -22,7 +22,7 @@ class File
             $type = $this->get_type(mime_content_type($nueva_ruta));
             return ["OK", $id, $type];
         } else {
-            return ["Error al subir"];
+            return ["Error al subir",$id];
         }
     }
 

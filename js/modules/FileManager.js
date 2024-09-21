@@ -1,4 +1,6 @@
-let ruta = "";
+// Inicializamos las variables para trabajar
+// en ámbito global
+let ruta = ""; 
 let file_name = "";
 
 export class FileManager {
@@ -22,13 +24,14 @@ async function RequestImgData() {
 
     // Validamos si podemos enviar los datos
     if (ruta === "" || file_name === "") {
+        // Devolvemos el error
         return {
             status: "error",
             message: "Falta el archivo o la ruta"
         }
     }
 
-    // Preparamos el body con los datos
+    // Instanciamos y parametrizamos el form
     const form = new FormData;
 
     form.append("arg", "get_data");
@@ -45,6 +48,7 @@ async function RequestImgData() {
         }
     });
     
+    // Devolvemos los datos de la imagen
     return {
         status: "OK",
         data: response
