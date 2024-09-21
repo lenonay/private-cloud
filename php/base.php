@@ -97,6 +97,28 @@ class File
         
     }
 
+    public function get_data($name, $ruta){
+        global $root;
+        $n_ruta = ($ruta == "/") ? $root : "$root/$ruta";
+
+        $path = "$n_ruta/$name";
+
+        // Obtenemos los datos
+        $size = getimagesize($path);
+
+        $width = $size[0];
+        $height = $size[1];
+
+        // Obtener el blob
+        $blob = getBlob($path);
+
+        return [
+            "width" => $width,
+            "height" => $height,
+            "src" => $blob
+        ];
+    }
+
     private function delTreeDir($path)
     {
         if (!is_dir($path)) {
@@ -150,19 +172,6 @@ class File
                 break;
         }
         return $type;
-    }
-
-
-    public function getIMG($name, $id, $ruta)
-    {
-        global $root;
-        $n_ruta = ($ruta == "/") ? $root : "$root/$ruta";
-
-        $path = "$n_ruta/$name";
-
-        $blob = getBlob($path);
-
-        return [$id, $blob];
     }
 
 }

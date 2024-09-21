@@ -25,6 +25,19 @@ Esta desarollado usando una API programada en PHP y llamadas a la misma a travé
 **Cambios Menores**
 - Los archivos ocultos ni se muestran ni causan conflicto
 
+## 0.5.0
+**Cambios Mayores**
+- Ya se pueden ver las imagenes subidas
+- Esta preparado para verlo en todos los dispositivos
+
+**Cambios Menores**
+- Ahora cada que se completa la subida de un archivo se recargan para que sea funcional (Antes se quedaba inutil porque no se le asignaban los listener)
+
+*Pendientes*
+Asignar espacios
+LV 
+Operar
+
 *Notas:*
 Queda crear carpetas, restaurar archivos a su ruta original, si no existe mover a al /
 

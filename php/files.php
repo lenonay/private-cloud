@@ -28,13 +28,6 @@ switch ($arg) {
             htmlspecialchars($_POST["ruta"])
         ));
         exit();
-    case "getIMG":
-        echo json_encode($File->getIMG(
-            htmlspecialchars($_POST["name"]),
-            htmlspecialchars($_POST["id"]),
-            htmlspecialchars($_POST["ruta"])
-        ));
-        exit();
     case "rename":
         echo json_encode($File->rename(
             htmlspecialchars($_POST["new_name"]),
@@ -54,6 +47,11 @@ switch ($arg) {
             htmlspecialchars($_POST["ruta"])
         ));
         exit();
+    case "get_data":
+        echo json_encode($File->get_data(
+            htmlspecialchars($_POST["name"]),
+            htmlspecialchars($_POST["ruta"])
+        ));
     default:
         return json_encode(["Argumento erróneo"]);
 }

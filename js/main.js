@@ -1,5 +1,6 @@
-import { get_svg } from "./svg.js"; // Importamos los svg
-import { get_size } from "./svg.js"; // Importamos el selector de tamaño segun el vw
+import { get_svg } from "./modules/svg.js"; // Importamos los svg
+import { get_size } from "./modules/svg.js"; // Importamos el selector de tamaño segun el vw
+import { FileManager } from "./modules/FileManager.js";
 
 const $ = sel => document.querySelector(sel);
 const $$ = sel => document.querySelectorAll(sel);
@@ -53,7 +54,7 @@ menu_vw.addEventListener("click", HandlerLatMenu);
 // Cargamos los iconos
 LoadOpcIcons();
 // Cargar por primera vez la vault
-HandlerChangeOpc(document.querySelector(".options[recycle]"), "recycle");
+HandlerChangeOpc(document.querySelector(".options[main]"), "main");
 
 function LoadOpcIcons() {
     // Recuperamos todas las opciones
@@ -114,7 +115,7 @@ function procesarArchivo(file) {
 
 function UploadFile(file, ruta) {
 
-    if(current_route.includes(".recycle_bin")){
+    if (current_route.includes(".recycle_bin")) {
         ShowErrors("No se puede subir aquí");
         return;
     }
@@ -132,10 +133,8 @@ function UploadFile(file, ruta) {
 
     const row = `
         <tr>
-            <td icon>${icon}</td>
-            <td name>${ar[1]}</td>
-            <td del class="act_btn">${svg.trash}</td>
-            <td down class="act_btn">${svg.download}</td>
+            <td id="${id}" icon>${svg.loader}</td>
+            <td name>${name}</td>
         </tr>
     `;
 
@@ -161,8 +160,6 @@ function UploadFile(file, ruta) {
             return response.json();
         }
     }).then(data => {
-        console.log(data);
-
         if (data[0] !== "OK") {
             ShowErrors(data[0]);
         }
@@ -173,7 +170,7 @@ function UploadFile(file, ruta) {
         load.classList.remove("loader");
         svg._color = "35bcbf";
         load.innerHTML = svg[data[2]];
-
+        GetAllInfo(current_route)
     });
 }
 
@@ -231,6 +228,7 @@ function ProcessData(array) {
             svg._color = "263849";
         } else {
             svg._color = "35bcbf";
+            attr = "file";
         }
         // Icono segun tipo de archivo
         const icon = svg[ar[0]];
@@ -263,14 +261,37 @@ function ProcessData(array) {
 
     document.querySelector(".content").addEventListener("dblclick", RenameItem);
 
+    // Obtenemos los archivos
+    const archivos = $$("tr[file] td[name]");
+
+    // Asginamos el evento
+    archivos.forEach(archivo => {
+        archivo.addEventListener("click", async event => {
+            // Procesamos la petición
+            const res = await FileManager.Load(event, current_route)
+
+            // Si hay un error lo mostramos
+            if (!res.status === "OK") {
+                ShowErrors(res.message);
+                return;
+            }
+
+            ProcessIMG(res.data);
+        });
+    })
+
+    // Obtenemos los botones de borrar
     const delBtns = $$("td[del]");
 
+    // Asignamos el evento
     delBtns.forEach(boton => {
         boton.addEventListener("click", Delete);
     });
 
+    // Obtemos las carpetas
     const folders = viewer.querySelectorAll("tr[folder]");
 
+    // Asignamos el nuevo path y recargamos
     folders.forEach(folder => {
         const td = folder.querySelector("td[name]");
 
@@ -298,7 +319,7 @@ function retrocederPath() {
 function RenameItem(event) {
     let new_name = "";
     // Evitamos que se cambie el nombre en la papelera
-    if(current_route.includes(".recycle_bin")){
+    if (current_route.includes(".recycle_bin")) {
         return;
     }
 
@@ -466,5 +487,60 @@ function Delete_def(padre, name) {
     // Añadimos los eventos para los botones
     $(".aviso .accept").addEventListener("click", accept);
     $(".aviso .cancel").addEventListener("click", cancel);
+
+}
+
+function ProcessIMG(data) {
+
+    const { width, height, src } = data
+
+    // Borramos el display si ya estaba
+    if($(".display")){
+        $(".display").remove();
+    }
+
+    // Creamos el display con la imagen
+    const display = `
+        <div class="display">
+            <img 
+                class="image"
+                src="${src}"
+                alt="Image viewer"
+            />
+        </div>
+    `;
+
+    // Creamos el fondo para el eventListener
+    const back = `
+        <div class="back"></div>
+    `;
+
+    // Añadimos ambos al documento
+    $(".main").insertAdjacentHTML("afterbegin",back);
+    $(".main").insertAdjacentHTML("afterbegin",display);
+
+    // Creamos el evento para borrar ambas cosas
+    $(".back").addEventListener("click", e =>{
+        $(".display").remove();
+        e.target.remove();
+    });
+    
+
+
+}
+
+function Set_Options() {
+    if (current_route.includes(".recycle_bin")) {
+        // Quitar la opción de nueva carpeta
+        return
+    }
+
+    const html = `
+        <tr class="options_table">
+            <th>
+                
+            </th>
+        </tr>
+    `;
 
 }
