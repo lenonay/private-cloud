@@ -49,7 +49,6 @@ Es necesesario crear un archivo oculto en recycle_bin que contenga información 
 ### TODO
 - [ ] Reproducir videos
 - [ ] Mostrar documentos
-- [ ] 
 
 **Bug resueltos**
 - [Grave] Bug que impedía que se mostraran el display
