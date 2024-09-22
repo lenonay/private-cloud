@@ -52,6 +52,11 @@ switch ($arg) {
             htmlspecialchars($_POST["name"]),
             htmlspecialchars($_POST["ruta"])
         ));
+    case "create_folder":
+        echo json_encode($File->create_folder(
+            htmlspecialchars($_POST["name"]),
+            htmlspecialchars($_POST["ruta"])
+        ));
     default:
         return json_encode(["Argumento erróneo"]);
 }

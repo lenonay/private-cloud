@@ -22,10 +22,9 @@ class File
             $type = $this->get_type(mime_content_type($nueva_ruta));
             return ["OK", $id, $type];
         } else {
-            return ["Error al subir",$id];
+            return ["Error al subir", $id];
         }
     }
-
     public function GetAll($ruta)
     {
         global $root;
@@ -50,7 +49,6 @@ class File
 
         return $names;
     }
-
     public function rename($new_name, $old_name, $ruta)
     {
         global $root;
@@ -87,17 +85,16 @@ class File
             return "Error deleting";
         }
     }
-
     public function delete_def($name, $ruta)
     {
         global $recycle;
         $path = "$recycle/$name";
 
         return $this->delTreeDir($path);
-        
-    }
 
-    public function get_data($name, $ruta){
+    }
+    public function get_data($name, $ruta)
+    {
         global $root;
         $n_ruta = ($ruta == "/") ? $root : "$root/$ruta";
 
@@ -118,7 +115,25 @@ class File
             "src" => $blob
         ];
     }
+    public function create_folder($folder_name, $ruta)
+    {
+        // Creamos el path
+        global $root;
+        $n_ruta = ($ruta == "/") ? $root : "$root/$ruta";
+        $path = "$n_ruta/$folder_name";
 
+        // Cambiamos el umask
+        umask(0002);
+
+        // Creamos la carpeta
+        if(mkdir($path, 0770)){
+            umask(0);
+            return "OK";
+        }else{
+            umask(0);
+            return "Error al crear el directorio";
+        }
+    }
     private function delTreeDir($path)
     {
         if (!is_dir($path)) {
@@ -173,7 +188,6 @@ class File
         }
         return $type;
     }
-
 }
 
 function getBlob($file_path)

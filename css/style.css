@@ -211,6 +211,7 @@ header>* {
     background: var(--dark);
     padding: 5px 15px;
     border-radius: 10px;
+    height: 40px;
 }
 
 .route_display {
@@ -221,7 +222,6 @@ header>* {
 
 .new_folder {
     color: aliceblue;
-    height: 40px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -272,6 +272,10 @@ th.error{
     border: none;
     outline: none;
     border-bottom: 1px solid var(--light);
+}
+
+.rename_inp.folder {
+    position: relative;
 }
 
 .content tbody {

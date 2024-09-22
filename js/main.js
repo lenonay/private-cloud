@@ -232,9 +232,10 @@ function ProcessData(array) {
     // opción de retroceder un path
     if (current_route !== "/" && current_route !== ".recycle_bin") {
         extra = `
-            <tr back colspan="3">
-                <td>${svg.back}</td>
+            <tr back>
+                <td icon>${svg.back}</td>
                 <td>Retroceder</td>
+                <td></td>
             </tr>
         `;
     }
@@ -263,7 +264,7 @@ function ProcessData(array) {
             svg._color = "35bcbf";
             attr = "file";
         }
-        svg._size = "30px"
+        svg._size = "30px";
 
         // Get icon by type
         const icon = svg[ar[0]];
@@ -342,7 +343,10 @@ function ProcessData(array) {
             GetAllInfo(current_route);
         });
 
-    })
+    });
+
+    // Evento para crear carpetas
+    $(".new_folder").addEventListener("click", CreateNewFolder);
 }
 
 function retrocederPath() {
@@ -594,4 +598,102 @@ function Set_Options() {
     return `
         <th class="new_folder">${svg.new_folder}</th>
     `;
+}
+
+function CreateNewFolder(event) {
+    // Creamos un id
+    const id = Math.random().toString(32).replace(/0\./,"tmp-");
+
+    // icon settings
+    svg._color = "263849";
+    svg._size = "30px";
+
+    // Creamos la nueva fila
+    const row = `
+        <tr folder id="${id}">
+            <td icon>${svg.folder_open}</td>
+            <td><input class="rename_inp folder" type="text"></td>
+        </tr>
+    `;
+    // Obtenemos el tbody y el retroceder path
+    const tbody = document.querySelector(".content tbody");
+    const back = tbody.querySelector("tr[back]");
+
+    // Si hay retroceder path lo añadimos despues de este
+    // sino el primero del tbody
+    if (back) {
+        back.insertAdjacentHTML("afterend", row);
+    } else {
+        tbody.insertAdjacentHTML("afterbegin", row);
+    }
+
+    // Recuperamos los elementos
+    const tr = $(`#${id}`);
+    const input = tr.querySelector("input");
+    
+    // Hacemos focus en el elemento
+    input.focus();
+
+    // Hacemos blur cuando se haga enter o escape
+    input.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === "Escape"){
+            input.blur();
+        }
+    });
+
+    // Validamos el nombre
+    input.addEventListener("blur", ValidateNewFolder);
+}
+
+function ValidateNewFolder(event){
+    // Recuperamos elementos
+    const input = event.target;
+    const tr = input.parentElement.parentElement;
+
+    const NewFolder = input.value;
+
+    // Validamos nully
+    if(NewFolder === "" || NewFolder === null){
+        ShowErrors("El nombre no puede estar en blanco");
+        tr.remove();
+        return;
+    }
+
+    // Validamos caracteres especiales
+    const banned_chars = ["<",">","/","|","*","?"," ","\\", "."];
+
+    if(banned_chars.some(char => NewFolder.includes(char))){
+        ShowErrors("Caracteres inválidos");
+        tr.remove();
+        return;
+    }
+
+    // Enviamos al servidor
+    SendNewFolder(NewFolder, tr);
+}
+
+function SendNewFolder(name, padre){
+    // Instanciamos y parametrizamos un form
+    const form = new FormData;
+
+    form.append("arg", "create_folder");
+
+    form.append("name", name);
+    form.append("ruta",current_route);
+
+    fetch("./php/files.php",{
+        method: "POST",
+        body: form
+    }).then(response =>{
+        if(response.ok){
+            return response.json();
+        }
+    }).then(data => {
+        if(data === "OK"){
+            GetAllInfo(current_route);
+        }else{
+            padre.remove();
+            ShowErrors(data);
+        }
+    });
 }
