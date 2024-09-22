@@ -1,6 +1,6 @@
 // Inicializamos las variables para trabajar
 // en ámbito global
-let ruta = ""; 
+let ruta = "";
 let file_name = "";
 
 export class FileManager {
@@ -14,7 +14,7 @@ export class FileManager {
 
         // Enviamos la petición al servidor
         const res = await RequestImgData();
-        
+
         // Devolvemos la respuesta
         return res;
     }
@@ -43,11 +43,13 @@ async function RequestImgData() {
         method: "POST",
         body: form
     }).then(response => {
-        if (response.ok) { 
-            return response.json() 
+        if (response.ok) {
+            return response.json()
+        } else {
+            return { status: "error", data: "Error reading the image" }
         }
     });
-    
+
     // Devolvemos los datos de la imagen
     return {
         status: "OK",

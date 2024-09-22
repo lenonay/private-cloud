@@ -136,7 +136,7 @@ header>* {
 .main {
     max-width: 1200px;
     width: 100%;
-    display:grid;
+    display: grid;
     grid-template-columns: minmax(90px, 200px) 1fr;
     column-gap: 20px;
     position: relative;
@@ -234,7 +234,7 @@ header>* {
     box-shadow: 0 0 5px 1px var(--light);
 }
 
-th.error{
+th.error {
     font-weight: 600;
     color: var(--alert);
 }
@@ -331,7 +331,7 @@ th.error{
     box-shadow: 0 0 6px 1px var(--light);
 }
 
-.aviso{
+.aviso {
     position: absolute;
     z-index: 5;
     display: flex;
@@ -350,7 +350,7 @@ th.error{
     font-weight: 600;
     left: 50%;
     top: 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
 }
 
 .aviso svg {
@@ -396,7 +396,7 @@ th.error{
     padding: 20px;
     left: 50%;
     top: 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     z-index: 10;
     display: flex;
     justify-content: center;
@@ -440,12 +440,14 @@ th.error{
         font-size: 14px;
     }
 
-    .content td[name]{
+    .content td[name] {
         font-size: 14px;
     }
+
     .content tr[back] {
         font-size: 14px;
     }
+
     .content thead tr th {
         font-size: 16px;
     }
@@ -459,11 +461,22 @@ th.error{
         padding: 5px 10px;
     }
 
-    .options > span {
+    .options>span {
         display: none;
     }
+
     .main {
         grid-template-columns: auto 1fr;
         gap: 10px;
+    }
+
+    .display {
+        max-width: 85vw;
+        max-height: 80vh;
+    }
+
+    .display .image {
+        max-width: 80vw;
+        max-height: 75vh;
     }
 }

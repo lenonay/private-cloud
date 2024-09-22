@@ -317,12 +317,13 @@ function ProcessData(array) {
             const res = await FileManager.Load(event, current_route)
 
             // Si hay un error lo mostramos
-            if (!res.status === "OK") {
-                ShowErrors(res.message);
+            if (res.status === "OK") {
+                ProcessIMG(res.data);
+                return;
+            } else {
+                ShowErrors(res.data);
                 return;
             }
-
-            ProcessIMG(res.data);
         });
     })
 

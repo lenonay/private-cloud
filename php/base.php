@@ -100,20 +100,23 @@ class File
 
         $path = "$n_ruta/$name";
 
-        // Obtenemos los datos
-        $size = getimagesize($path);
-
-        $width = $size[0];
-        $height = $size[1];
-
         // Obtener el blob
         $blob = getBlob($path);
 
-        return [
-            "width" => $width,
-            "height" => $height,
-            "src" => $blob
-        ];
+        // Obtenemos los datos
+        if (str_contains(mime_content_type($path), "image")) {
+            $img_data = getimagesize($path);
+
+            return [
+                "src" => $blob,
+                "width" => $img_data[0],
+                "height" => $img_data[1]
+            ];
+        } else {
+            return [
+                "src" => $blob
+            ];
+        }
     }
     public function create_folder($folder_name, $ruta)
     {
@@ -126,10 +129,10 @@ class File
         umask(0002);
 
         // Creamos la carpeta
-        if(mkdir($path, 0770)){
+        if (mkdir($path, 0770)) {
             umask(0);
             return "OK";
-        }else{
+        } else {
             umask(0);
             return "Error al crear el directorio";
         }

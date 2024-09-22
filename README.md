@@ -44,7 +44,14 @@ Hay que añadir un boton de vaciar papelera de reciclaje y ademas la opcion de r
 Queda crear carpetas, restaurar archivos a su ruta original, si no existe mover a al /
 Es necesesario crear un archivo oculto en recycle_bin que contenga información sobre los archivos que haya, o en su defecto una base de datos.
 
-## Desarrollo actual.
-De momento ya se puede subir ficheros y navegar por la estructura de carpetas. Ya se pueden ver los archivos en todos los dispositivos. Hay papelera de reciclaje.
+## 0.5.1
 
-Además falta toda la lógica de usuarios y login, ya que me centraré primero en la funcionalidad base de la APP.
+### TODO
+- [ ] Reproducir videos
+- [ ] Mostrar documentos
+- [ ] 
+
+**Bug resueltos**
+- [Grave] Bug que impedía que se mostraran el display
+- [Leve] Bug al intentar obtener la altura y ancho de archivos que no son imagenes
+- [Leve] Mejorado el tamaño del display para moviles
