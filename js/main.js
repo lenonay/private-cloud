@@ -100,6 +100,9 @@ function HandlerChangeOpc(option, attr) {
             GetAllInfo(".recycle_bin");
             current_route = ".recycle_bin";
             break;
+        case "shared":
+            viewer.innerHTML = `<h1 style="color:var(--green)">Trabajando en ello...</h1>`;
+            break;
     }
 }
 
@@ -346,7 +349,9 @@ function ProcessData(array) {
     });
 
     // Evento para crear carpetas
-    $(".new_folder").addEventListener("click", CreateNewFolder);
+    if ($(".new_folder")) {
+        $(".new_folder").addEventListener("click", CreateNewFolder);
+    }
 }
 
 function retrocederPath() {
@@ -602,7 +607,7 @@ function Set_Options() {
 
 function CreateNewFolder(event) {
     // Creamos un id
-    const id = Math.random().toString(32).replace(/0\./,"tmp-");
+    const id = Math.random().toString(32).replace(/0\./, "tmp-");
 
     // icon settings
     svg._color = "263849";
@@ -630,13 +635,13 @@ function CreateNewFolder(event) {
     // Recuperamos los elementos
     const tr = $(`#${id}`);
     const input = tr.querySelector("input");
-    
+
     // Hacemos focus en el elemento
     input.focus();
 
     // Hacemos blur cuando se haga enter o escape
     input.addEventListener("keydown", e => {
-        if (e.key === "Enter" || e.key === "Escape"){
+        if (e.key === "Enter" || e.key === "Escape") {
             input.blur();
         }
     });
@@ -645,7 +650,7 @@ function CreateNewFolder(event) {
     input.addEventListener("blur", ValidateNewFolder);
 }
 
-function ValidateNewFolder(event){
+function ValidateNewFolder(event) {
     // Recuperamos elementos
     const input = event.target;
     const tr = input.parentElement.parentElement;
@@ -653,16 +658,16 @@ function ValidateNewFolder(event){
     const NewFolder = input.value;
 
     // Validamos nully
-    if(NewFolder === "" || NewFolder === null){
+    if (NewFolder === "" || NewFolder === null) {
         ShowErrors("El nombre no puede estar en blanco");
         tr.remove();
         return;
     }
 
     // Validamos caracteres especiales
-    const banned_chars = ["<",">","/","|","*","?"," ","\\", "."];
+    const banned_chars = ["<", ">", "/", "|", "*", "?", " ", "\\", "."];
 
-    if(banned_chars.some(char => NewFolder.includes(char))){
+    if (banned_chars.some(char => NewFolder.includes(char))) {
         ShowErrors("Caracteres inválidos");
         tr.remove();
         return;
@@ -672,26 +677,26 @@ function ValidateNewFolder(event){
     SendNewFolder(NewFolder, tr);
 }
 
-function SendNewFolder(name, padre){
+function SendNewFolder(name, padre) {
     // Instanciamos y parametrizamos un form
     const form = new FormData;
 
     form.append("arg", "create_folder");
 
     form.append("name", name);
-    form.append("ruta",current_route);
+    form.append("ruta", current_route);
 
-    fetch("./php/files.php",{
+    fetch("./php/files.php", {
         method: "POST",
         body: form
-    }).then(response =>{
-        if(response.ok){
+    }).then(response => {
+        if (response.ok) {
             return response.json();
         }
     }).then(data => {
-        if(data === "OK"){
+        if (data === "OK") {
             GetAllInfo(current_route);
-        }else{
+        } else {
             padre.remove();
             ShowErrors(data);
         }

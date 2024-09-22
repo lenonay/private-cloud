@@ -29,12 +29,13 @@ Esta desarollado usando una API programada en PHP y llamadas a la misma a travé
 **Cambios Mayores**
 - Ya se pueden ver las imagenes subidas
 - Esta preparado para verlo en todos los dispositivos
-- Se ha añadido el el boton de new_folder (falta su funcion)
+- Se ha añadido la opcion de crear carpetas nuevas.
 
 **Cambios Menores**
 - Ahora cada que se completa la subida de un archivo se recargan para que sea funcional (Antes se quedaba inutil porque no se le asignaban los listener)
 - Mejora en la legilibilidad del código
 - Todo esta bien documentado y comentado
+- *Bug arreglado* Se generaba un error por intentar añadir un listener a un elemento que no existe.
 
 *Pendientes*
 Hay que añadir un boton de vaciar papelera de reciclaje y ademas la opcion de restaurar los ficheros a su localizacion original
