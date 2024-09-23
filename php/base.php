@@ -103,20 +103,14 @@ class File
         // Obtener el blob
         $blob = getBlob($path);
 
-        // Obtenemos los datos
-        if (str_contains(mime_content_type($path), "image")) {
-            $img_data = getimagesize($path);
+        // Obtemos la etiqueta
+        $data_tag = $this->GetHTMLTag(mime_content_type($path));
 
-            return [
-                "src" => $blob,
-                "width" => $img_data[0],
-                "height" => $img_data[1]
-            ];
-        } else {
-            return [
-                "src" => $blob
-            ];
-        }
+        return [
+            "src" => $blob,
+            "tag" => $data_tag['tag'],
+            "mime-type" => $data_tag['mime-type']
+        ];
     }
     public function create_folder($folder_name, $ruta)
     {
@@ -124,6 +118,11 @@ class File
         global $root;
         $n_ruta = ($ruta == "/") ? $root : "$root/$ruta";
         $path = "$n_ruta/$folder_name";
+
+        // Validamos si ya existe esa carpeta
+        if (is_dir($path)) {
+            return "Esa carpeta ya existe";
+        }
 
         // Cambiamos el umask
         umask(0002);
@@ -136,6 +135,25 @@ class File
             umask(0);
             return "Error al crear el directorio";
         }
+    }
+
+    private function GetHTMLTag($mime)
+    {
+        $tag = "img";
+
+        switch (true) {
+            case str_contains($mime, "image");
+                $tag = "img";
+                break;
+            case str_contains($mime, "video"):
+                $tag = "video";
+                break;
+        }
+
+        return [
+            "tag" => $tag,
+            "mime-type" => $mime
+        ];
     }
     private function delTreeDir($path)
     {

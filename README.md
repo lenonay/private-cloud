@@ -49,6 +49,9 @@ Es necesesario crear un archivo oculto en recycle_bin que contenga información 
 ### TODO
 - [ ] Reproducir videos
 - [ ] Mostrar documentos
+- [ ] Loading animation while loading files
+- [ ] Recycle path
+- [ ] Reload button
 
 **Bug resueltos**
 - [Grave] Bug que impedía que se mostraran el display

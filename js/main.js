@@ -134,7 +134,7 @@ function UploadFile(file, ruta) {
     const name = file.name;
 
     // Si el archivo es demasiado pesado cancelar.
-    if (file.size > 200000000) { ShowErrors("Archivo demasiado pesado"); return "" }
+    // if (file.size > 200000000) { ShowErrors("Archivo demasiado pesado"); return "" }
 
     // Validamos la ruta
     ruta = ruta ?? "/";
@@ -560,7 +560,7 @@ function Delete_def(padre, name) {
 function ProcessIMG(image) {
 
     // Recuperamos el src de la imagen
-    const { src } = image
+    const { src, tag } = image
 
     // Borramos el display si ya estaba
     if ($(".display")) {
@@ -570,11 +570,7 @@ function ProcessIMG(image) {
     // Creamos el display con la imagen
     const display = `
         <div class="display">
-            <img 
-                class="image"
-                src="${src}"
-                alt="Image viewer"
-            />
+            <${tag} class="image" src="${src}"/></${tag}>
         </div>
     `;
 
@@ -594,7 +590,7 @@ function ProcessIMG(image) {
     });
 }
 
-function Set_Options() {
+function Set_Options() {    
     // Si estamos en recycle no devolvemos nada
     if (current_route.includes(".recycle_bin")) {
         return "";

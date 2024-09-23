@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] !== "POST") {
 }
 
 if (!isset($_POST["arg"])) {
-    echo json_encode("Faltan campos importantes");
+    echo json_encode(["Faltan campos importantes"]);
     exit();
 }
 
